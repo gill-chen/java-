@@ -1,0 +1,186 @@
+import java.util.ArrayList;
+import java.util.Hashtable;
+
+public class MidiTrack{
+    private Hashtable<Character,Integer> noteToPitch;
+
+    private ArrayList<MidiNote> notes;
+    private int instrumentId;
+    
+    // The constructor for this class
+    public MidiTrack(int instrumentId)
+    {
+        notes = new ArrayList<MidiNote>();
+        this.instrumentId = instrumentId;
+        this.initPitchDictionary();
+    }
+
+    // This initialises the noteToPitch dictionary,
+    // which will be used by you to convert note letters
+    // to pitch numbers
+    public void initPitchDictionary(){
+        noteToPitch  = new Hashtable<Character, Integer>();
+        noteToPitch.put('C', 60);
+        noteToPitch.put('D', 62);
+        noteToPitch.put('E', 64);
+        noteToPitch.put('F', 65);
+        noteToPitch.put('G', 67);
+        noteToPitch.put('A', 69);
+        noteToPitch.put('B', 71);
+    }
+
+    // GETTER METHODS
+    public ArrayList<MidiNote> getNotes()
+    {
+        return notes;
+    }
+    
+    public int getInstrumentId(){
+        return instrumentId;
+    }
+    
+    // This method converts notestrings like
+    // <<3E3P2E2GP2EPDP8C<8B>
+    // to an ArrayList of MidiNote objects 
+    // ( the notes attribute of this class )
+    
+    public void loadNoteString(String notestring)
+    {
+      // convert the letters in the notestring to upper case
+      notestring = notestring.toUpperCase();
+      int duration = 0;
+      int pitch = 0;
+      int octave = 0;
+      
+      //for loop to iterate through the string 
+      for (int x = 0; x < notestring.length(); x++)
+      { 
+        //this if statement checks if the current character is one that shifts all the subsequent notes up an octave, or down
+        if (notestring.charAt(x) == 60 || notestring.charAt(x) == 62)
+        {
+          if (notestring.charAt(x) == 60)
+          {
+            octave -= 12;
+          }
+          else
+          {
+            octave += 12; 
+          }
+        }
+        //this else if statement checks if the current character is a duration character, and if the duration is >= 10
+        //beats, it takes it into account by creating a substring of all the 'integer' characters adjacent to each other,
+        //and uses this substring into the integer.valueOf method to convert the 'integer' string to an integer value. 
+        else if ((notestring.charAt(x) <= 57) && (notestring.charAt(x) >= 48))
+        {
+          int begin = x; 
+          if ((!(x == notestring.length()-1)) && (notestring.charAt(x+1) <= 57) && (notestring.charAt(x+1) >= 48))
+          {
+            while ((notestring.charAt(x) <= 57) && (notestring.charAt(x) >= 48))
+            {             
+              x++; 
+            }
+            int end = x; 
+            String substring = notestring.substring(begin, end); 
+            System.out.println(substring); 
+            duration = Integer.valueOf(substring); 
+            x--;
+          }
+          else
+          {
+            duration += (notestring.charAt(x) - 48);
+          }
+        }
+        //if the character is a 'note' and the duration is specifically specified to be greater than 1 (as determined, 
+        //from the statements above, this else if statement adds a MidiNote object to the arraylist, with the specified
+        //duration, as well as the flats/sharps into account. 
+        else if (((notestring.charAt(x) <= 71) && (notestring.charAt(x) >= 65)) && duration != 0)
+        {
+          if (!(x == notestring.length()-1) && (notestring.charAt(x+1) == 35))
+          {
+            notes.add(new MidiNote((noteToPitch.get(notestring.charAt(x))+octave +1), duration));
+            duration = 0; 
+          }
+          else if (!(x == notestring.length()-1) && (notestring.charAt(x+1) == 33))
+          {
+            notes.add(new MidiNote((noteToPitch.get(notestring.charAt(x))+octave -1), duration));
+            duration = 0; 
+          }
+          else 
+          {
+            notes.add(new MidiNote((noteToPitch.get(notestring.charAt(x))+octave), duration));
+            duration = 0; 
+          }
+        }
+        //this else if statement does the same as above, except this else if statement is for 'notes' with
+        //no duration (AKA duration =1) specified before the note. 
+        else if (((notestring.charAt(x) <= 71) && (notestring.charAt(x) >= 65)) && duration == 0)
+        {
+          if (!(x == notestring.length()-1) && (notestring.charAt(x+1) == 35))
+          {
+            notes.add(new MidiNote((noteToPitch.get(notestring.charAt(x))+octave +1), duration));
+          }
+          else if (!(x == notestring.length()-1) && (notestring.charAt(x+1) == 33))
+          {
+            notes.add(new MidiNote((noteToPitch.get(notestring.charAt(x))+octave -1), duration));
+          }
+          else
+          {
+            notes.add(new MidiNote((noteToPitch.get(notestring.charAt(x))+octave), duration));
+          }
+        }    
+        //finally, this else if statement runs if the character is a pause, and depending on whether the
+        //duration was specified before the character/pause, it will add a MidiNote to the arraylist with the
+        //specified duration. (all 'pause' MidiNote will have their silent attributes set to true) 
+        else if (notestring.charAt(x) == 80)
+        {
+          if (duration != 0)
+          {
+            MidiNote pause = new MidiNote (65+octave, duration);
+            pause.setSilent(true); 
+            notes.add(pause);
+            duration = 0; 
+          }
+          else
+          {
+            MidiNote pause = new MidiNote (65+octave, 1);
+            pause.setSilent(true); 
+            notes.add(pause); 
+          }
+        }
+      }
+    }
+    public void revert()
+    {
+      ArrayList<MidiNote> reversedTrack = new ArrayList<MidiNote>();     
+      for ( int i = notes.size() - 1; i >= 0; i--){
+        MidiNote oldNote = notes.get(i);
+        // create a newNote
+        MidiNote newNote = new MidiNote(oldNote.getPitch(), oldNote.getDuration());
+        
+        // check if the note was a pause
+        if(oldNote.isSilent()){
+          newNote.setSilent(true);
+        }
+        
+        // add the note to the new arraylist
+        reversedTrack.add(newNote);
+      }
+      notes = reversedTrack;
+    }
+
+    // This will only be called if you try to run this file directly
+    // You may use this to test your code.
+   /* public static void main(String[] args){
+        String notestring = "<<3E3P2E2GP2EPDP8C<8B>3E3P2E2GP2EPDP8C<8B>";
+        MidiTrack test = new MidiTrack (50);
+        test.loadNoteString(notestring); 
+        System.out.println(test.notes); 
+        MusicInterpreter play = new MusicInterpreter();
+        //play.setBPM(90);
+        
+    
+        //play.loadSingleTrack(test);
+        //play.play(); */
+
+    
+}

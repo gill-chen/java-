@@ -1,0 +1,29 @@
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Scanner;
+
+public class PlaySong{
+    public static void main( String[] args)
+    {
+        MusicInterpreter myMusicPlayer = new MusicInterpreter();
+        Song mySong = new Song(); 
+        String song_file_path = "./data/02.txt"; 
+        try 
+        {
+          mySong.loadFromFile(song_file_path);
+          // uncomment this line to print the available instruments
+          //System.out.println(myMusicPlayer.availableInstruments());
+        }
+        catch (IOException e)
+        {
+          System.out.println("Song file not found, please try another file"); 
+        }
+        
+        myMusicPlayer.loadSong(mySong); 
+        myMusicPlayer.play();
+        myMusicPlayer.close(); 
+        // remember to catch the appropriate Exceptions
+
+        // Play it
+    }
+}

@@ -1,0 +1,177 @@
+public class DoublyLinkedList{
+    Node start;
+    Node end; 
+    int length;
+    
+    public DoublyLinkedList()
+    {
+       this.start = null;
+       this.end = null; 
+       this.length = 0;
+    }
+    
+    public boolean isEmpty ()
+    {
+      return (this.start == null); 
+    }
+
+    // find if the value exists in the list
+    // if it does, return the first node that matches
+    // return null otherwise
+    public Node find( String value )
+    {   
+        Node current = start; 
+        while (current.data != value)
+        {
+         current = current.next; 
+         if (current == null)
+         {
+           return null; 
+         }
+        }
+        return current; 
+    }
+    
+    // insert a new node at the beginning of the list
+    public void insertStart (String value)
+    {
+        // TODO create a node with the input value and add it to the list
+      Node newNode = new Node(value); 
+      if (isEmpty())
+      {
+        end = newNode;
+      }
+      else 
+      {
+        newNode.next = start;
+        System.out.println(start == null);
+        start.previous = newNode;      
+      }
+      start = newNode;
+      length ++; 
+    }
+    
+    // insert a new node at the end of the list
+    public void insertEnd( String value )
+    {
+        // TODO create a node with the input value and add it to the list
+      Node newNode = new Node(value);
+      if (isEmpty())
+      {
+        start = newNode;
+      }
+      else 
+      {
+        end.next = newNode;
+        newNode.previous = end; 
+      }
+      end = newNode; 
+      length ++; 
+    }
+
+    // remove all the occurences of the value in the list
+    public void remove(String value)
+    {
+      Node thisNode = start;
+        
+      while (thisNode != null)
+      {
+        if (start.data == value)
+        {
+          start = start.next; 
+          start.previous = null; 
+          length --; 
+        }
+        else if (end.data == value)
+        {
+          end = end.previous;
+          end.next = null; 
+          length --; 
+        }
+        else if (thisNode.data == value)
+        {
+          thisNode.previous.next = thisNode.next; 
+          thisNode.next.previous = thisNode.previous; 
+          length --; 
+        }
+        thisNode = thisNode.next;
+      }
+    }
+
+    // remove from the list the Node at the position given
+    // by the value of index.
+    public void removeAtIndex(int index)
+    {
+      if (index == 0)
+      {
+        start = start.next; 
+        start.previous = null; 
+      }
+      else if (index == this.length-1)
+      {
+        end = end.previous;
+        end.next = null; 
+      }
+      else 
+      {
+        Node current = start;  
+        for (int x = 0; x < index ; x++)
+        {
+          current = current.next; 
+        }
+        current.previous.next = current.next;
+        current.next.previous = current.previous; 
+      }
+      length --; 
+    }
+   
+    // print the string in reverse order
+    public String toStringReverse()
+    {
+        String result = "";
+        Node pointer = this.end;
+        while (pointer != null)
+        {
+          result += pointer.toString();
+          pointer = pointer.previous; 
+        }
+        return result;
+    }
+
+    // print the string
+    public String toString()
+    {
+        String str = "";
+        Node pointer = this.start;
+        while ( pointer != null ) {
+            str += pointer.toString();
+            pointer = pointer.next;
+        }        
+        return str;
+    }
+    
+    public static void main (String[] args){
+        DoublyLinkedList list = new DoublyLinkedList();
+        String once = "And you may find yourself ";
+        
+        list.insertStart("I am helpless. ");
+        list.insertEnd(once);
+        list.insertEnd("I do not believe ");
+        list.insertEnd("Hello!. ");
+        list.insertEnd("There is hope. ");
+        
+        System.out.println(list);
+        Node n = list.find(once);
+        n.data += " in a shotgun shack.";
+        
+        System.out.println(list);
+        
+        list.remove(once);
+        list.removeAtIndex(4);
+        System.out.println(list.length);
+        
+        System.out.println(list);
+        
+        System.out.println(list.toStringReverse());
+    }
+}

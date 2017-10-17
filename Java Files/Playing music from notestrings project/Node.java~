@@ -1,0 +1,29 @@
+public class Node{
+
+    // TODO modify this class so that it 
+    // stores a reference to the previous 
+    // element in the list
+
+    String data;
+    Node next;
+    Node previous; 
+    
+    public Node(String input_data)
+    {
+        this.data = input_data;
+        this.next = null;
+        this.previous = null; 
+    }
+    
+    public Node (String input_data, Node next, Node previous)
+    {
+      this.data = input_data;
+      this.next = next;
+      this.previous = previous;
+    }
+    
+    public String toString ()
+    {
+      return data + ""; 
+    }
+}
